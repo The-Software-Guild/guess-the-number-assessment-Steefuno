@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * @author Steven
  */
 public class GuessTheNumberControllerExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final String MESSAGE = "Your guess is invalid. Please make sure you have 4 slots.";
+    private static final String MESSAGE = "Your guess is invalid. Please make sure you have 4 slots and that the game ID is valid.";
     
     /**
      * On a sql constraint exception, tell the client they had a bad request
