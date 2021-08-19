@@ -11,6 +11,7 @@ import com.mthree.guess_the_number_assessment.models.Guess;
 import com.mthree.guess_the_number_assessment.models.GuessResult;
 import com.mthree.guess_the_number_assessment.models.Round;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -21,12 +22,22 @@ public class DataService {
     @Autowired
     private GamesDao gamesDao;
     
+    private static Random random;
+    
     /**
      * Create a new game
      * @return the id of the new game
      */
     public int createGame() {
-        return gamesDao.createGame();
+        int[] answer;
+        
+        // Generate the answer
+        answer = new int[4];
+        for (int i = 0; i < answer.length; i++) {
+            answer[i] = random.nextInt(10);
+        }
+        
+        return gamesDao.createGame(answer);
     }
     
     /**
@@ -38,9 +49,24 @@ public class DataService {
      */
     public GuessResult addGuess(Guess guess, int gameId) throws SQLIntegrityConstraintViolationException {
         Round round;
+        GuessResult result;
+        char[] resultSlots;
         
         round = gamesDao.addGuess(guess, gameId);
-        return round.getGuessResult();
+        result = round.getGuessResult();
+        
+        // if the user won, end the game
+        resultSlots = result.getResults();
+        if (
+            (resultSlots[0] == 'e') &&
+            (resultSlots[1] == 'e') &&
+            (resultSlots[2] == 'e') &&
+            (resultSlots[3] == 'e')
+        ) {
+            gamesDao.endGame(gameId);
+        }
+        
+        return result;
     }
     
     /**

@@ -16,9 +16,16 @@ import java.sql.SQLIntegrityConstraintViolationException;
 public interface GamesDao {
     /**
      * Create a new game
+     * @param answer the solution to the game
      * @return the id of the new game
      */
-    public int createGame();
+    public int createGame(int[] answer);
+    
+    /**
+     * 
+     * @param gameId 
+     */
+    public void endGame(int gameId);
 
     /**
      * Applys a user's guess returning either that they solved the puzzle, or hints for their next guess

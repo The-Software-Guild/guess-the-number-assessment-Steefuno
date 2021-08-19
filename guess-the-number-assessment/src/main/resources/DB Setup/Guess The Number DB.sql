@@ -6,10 +6,6 @@ USE GuessTheNumberDB;
 
 CREATE TABLE game(
 	gameId INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
-    slot1 INT UNSIGNED NOT NULL,
-    slot2 INT UNSIGNED NOT NULL,
-    slot3 INT UNSIGNED NOT NULL,
-    slot4 INT UNSIGNED NOT NULL,
     PRIMARY KEY (gameId)
 );
 
@@ -39,3 +35,14 @@ CREATE TABLE solution(
     CONSTRAINT FOREIGN KEY fk_solution_game(gameId)
 		REFERENCES game(gameId)
 );
+
+INSERT INTO game() VALUES
+	()
+;
+SELECT * FROM game;
+INSERT INTO solution(gameId, solutionNumber, value) VALUES
+	(1, 0, 1),
+    (1, 1, 4),
+    (1, 2, 8),
+    (1, 3, 3)
+;
