@@ -11,7 +11,7 @@ package com.mthree.guess_the_number_assessment.models;
  * @author Steven
  */
 public class Guess {
-    private int[] guesses;
+    final private int[] guesses;
     
     /**
      * Constructs a new Guess given the guesses
