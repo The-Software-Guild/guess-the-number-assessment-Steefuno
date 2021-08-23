@@ -5,7 +5,6 @@
  */
 package com.mthree.guess_the_number_assessment.daos;
 
-import com.mthree.guess_the_number_assessment.models.Guess;
 import com.mthree.guess_the_number_assessment.models.Round;
 import java.sql.SQLIntegrityConstraintViolationException;
 
@@ -29,12 +28,12 @@ public interface GamesDao {
 
     /**
      * Applys a user's guess returning either that they solved the puzzle, or hints for their next guess
-     * @param guess the user's guess
+     * @param guesses the user's guess
      * @param gameId the id of the game
      * @return the results of the user's guess
      * @throws SQLIntegrityConstraintViolationException 
      */
-    public Round addGuess(Guess guess, int gameId) throws SQLIntegrityConstraintViolationException;
+    public Round addGuess(int[] guesses, int gameId) throws SQLIntegrityConstraintViolationException;
     
     /**
      * Gets the ids of all active games

@@ -6,13 +6,13 @@
 
 package com.mthree.guess_the_number_assessment.daos;
 
-import com.mthree.guess_the_number_assessment.models.Guess;
 import com.mthree.guess_the_number_assessment.models.Round;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -84,13 +84,13 @@ public class GamesDaoDBImplementation implements GamesDao {
     ;
     final private static String SELECT_GUESSES_SQL =
         "SELECT " +
-        "        round.time as time, " +
+        "    round.time as time, " +
         "    guess.guessNumber as guessNumber, " +
         "    guess.value as value " +
         "FROM round " +
         "INNER JOIN guess ON guess.roundId = round.roundId " +
         "WHERE round.roundId = ? " +
-        "ORDER BY guessNumber ASC "
+        "ORDER BY guess.guessNumber ASC "
     ;
     final private static String SELECT_GAMEIDS_SQL = 
         "SELECT gameId " +
@@ -107,7 +107,7 @@ public class GamesDaoDBImplementation implements GamesDao {
         "   round.roundId as roundId, " +
         "   round.time as time, " +
         "   guess.guessNumber as guessNumber, " +
-        "   guess.guessValue as guessValue" +
+        "   guess.value as guessValue " +
         "FROM round " +
         "INNER JOIN guess ON guess.roundId = round.roundId " +
         "WHERE round.gameId = ? " +
@@ -136,8 +136,8 @@ public class GamesDaoDBImplementation implements GamesDao {
         jdbcTemplate.update(
             (Connection connection) -> {
                 PreparedStatement preparedStatement;
-
-                preparedStatement = connection.prepareStatement(INSERT_GAME_SQL);
+                
+                preparedStatement = connection.prepareStatement(INSERT_GAME_SQL, Statement.RETURN_GENERATED_KEYS);
                 return preparedStatement;
             },
             keyHolder
@@ -219,17 +219,16 @@ public class GamesDaoDBImplementation implements GamesDao {
 
     /**
      * Applys a user's guess returning either that they solved the puzzle, or hints for their next guess
-     * @param guess the user's guess
+     * @param guesses the user's guess
      * @param gameId the id of the game
      * @return the results of the user's guess
      * @throws SQLIntegrityConstraintViolationException 
      */
     @Transactional
     @Override
-    public Round addGuess(Guess guess, int gameId) throws SQLIntegrityConstraintViolationException {
+    public Round addGuess(int[] guesses, int gameId) throws SQLIntegrityConstraintViolationException {
         KeyHolder keyHolder;
         int roundId;
-        List<SolutionValue> solutionValuesList;
         List<GuessValue> guessValuesList;
         int[] solutionValues;
         int[] guessValues;
@@ -241,7 +240,7 @@ public class GamesDaoDBImplementation implements GamesDao {
             (Connection connection) -> {
                 PreparedStatement preparedStatement;
                 
-                preparedStatement = connection.prepareStatement(INSERT_ROUND_SQL);
+                preparedStatement = connection.prepareStatement(INSERT_ROUND_SQL, Statement.RETURN_GENERATED_KEYS);
                 preparedStatement.setInt(1, gameId);
                 preparedStatement.setTimestamp(
                     2,
@@ -259,25 +258,23 @@ public class GamesDaoDBImplementation implements GamesDao {
         roundId = keyHolder.getKey().intValue();
         
         // insert the guess
-        jdbcTemplate.update(
-            (Connection connection) -> {
-                PreparedStatement preparedStatement;
-                int[] guesses;
-                
-                preparedStatement = connection.prepareStatement(INSERT_GUESS_SQL);
-                
-                // insert each guess value separately
-                guesses = guess.getGuesses();
-                for (int guessNumber = 0; guessNumber < guesses.length; guessNumber++) {
+        jdbcTemplate.batchUpdate(
+            INSERT_GUESS_SQL,
+            new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement preparedStatement, int index) throws SQLException {
                     preparedStatement.setInt(1, roundId);
-                    preparedStatement.setInt(2, guessNumber);
-                    preparedStatement.setInt(3, guesses[guessNumber]);
-                    preparedStatement.addBatch();
+                    preparedStatement.setInt(2, index);
+                    preparedStatement.setInt(3, guesses[index]);
                 }
                 
-                return preparedStatement;
+                @Override
+                public int getBatchSize() {
+                    return guesses.length;
+                }
             }
         );
+        
         
         // get the solutions for that game
         solutionValues = getSolution(gameId);
@@ -339,6 +336,11 @@ public class GamesDaoDBImplementation implements GamesDao {
         
         // get the solutions for that game
         solutionValues = getSolution(gameId);
+        
+        // if no guesses have been made
+        if (roundGuessSlots.isEmpty()) {
+            return null;
+        }
         
         // group the list of roundGuessSlots to an array of guessValues
         guessValues = new int[roundGuessSlots.size()];
@@ -408,7 +410,6 @@ public class GamesDaoDBImplementation implements GamesDao {
         );
         
         // generate the rounds
-        int roundIndex = 0;
         times.entrySet().forEach(
             entrySet -> {
                 rounds.add(

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,14 +39,13 @@ public class GuessTheNumberController {
     
     /**
      * Applys a user's guess returning either that they solved the puzzle, or hints for their next guess
-     * @param userGuess the user's guess
-     * @param gameId the id of the game
+     * @param guess the user's guess and the game id
      * @return the results of the user's guess
      * @throws SQLIntegrityConstraintViolationException 
      */
     @PostMapping("/guess")
-    public GuessResult guess(Guess userGuess, int gameId) throws SQLIntegrityConstraintViolationException {
-        return dataService.addGuess(userGuess, gameId);
+    public GuessResult guess(@RequestBody Guess guess) throws SQLIntegrityConstraintViolationException {
+        return dataService.addGuess(guess.getGuesses(), guess.getGameId());
     }
     
     /**

@@ -7,34 +7,47 @@
 package com.mthree.guess_the_number_assessment.services;
 
 import com.mthree.guess_the_number_assessment.daos.GamesDao;
-import com.mthree.guess_the_number_assessment.models.Guess;
 import com.mthree.guess_the_number_assessment.models.GuessResult;
 import com.mthree.guess_the_number_assessment.models.Round;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * 
  * @author Steven
  */
+@Component
 public class DataService {
     @Autowired
     private GamesDao gamesDao;
     
-    private static Random random;
+    final private static Random random = new Random();
     
     /**
      * Create a new game
      * @return the id of the new game
      */
     public int createGame() {
+        ArrayList<Integer> options;
         int[] answer;
         
-        // Generate the answer
+        // generate the possible numbers
+        options = new ArrayList<>(10);
+        for (int i = 0; i < 10; i++) {
+            options.add((Integer)i);
+        }
+        
+        // generate the answer
         answer = new int[4];
         for (int i = 0; i < answer.length; i++) {
-            answer[i] = random.nextInt(10);
+            answer[i] = 
+                options.remove(
+                    random.nextInt(options.size())
+                )
+            ;
         }
         
         return gamesDao.createGame(answer);
@@ -42,17 +55,17 @@ public class DataService {
     
     /**
      * Applys a user's guess returning either that they solved the puzzle, or hints for their next guess
-     * @param guess the user's guess
+     * @param guesses the user's guess
      * @param gameId the id of the game
      * @return the results of the user's guess
      * @throws SQLIntegrityConstraintViolationException 
      */
-    public GuessResult addGuess(Guess guess, int gameId) throws SQLIntegrityConstraintViolationException {
+    public GuessResult addGuess(int[] guesses, int gameId) throws SQLIntegrityConstraintViolationException {
         Round round;
         GuessResult result;
         char[] resultSlots;
         
-        round = gamesDao.addGuess(guess, gameId);
+        round = gamesDao.addGuess(guesses, gameId);
         result = round.getGuessResult();
         
         // if the user won, end the game
@@ -86,6 +99,11 @@ public class DataService {
         Round latestRound;
         
         latestRound = gamesDao.getGame(gameId);
+        
+        if (latestRound == null) {
+            return null;
+        }
+        
         return latestRound.getGuessResult();
     }
     

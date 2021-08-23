@@ -11,21 +11,32 @@ package com.mthree.guess_the_number_assessment.models;
  * @author Steven
  */
 public class Guess {
-    final private int[] guesses;
+    final private int[] guess;
+    final private int gameId;
     
     /**
-     * Constructs a new Guess given the guesses
-     * @param guesses 
+     * Constructs a new Guess that stores the user's request body
+     * @param guess the guess in the game
+     * @param gameId the game's id
      */
-    public Guess(int[] guesses) {
-        this.guesses = guesses;
+    public Guess(int[] guess, int gameId) {
+        this.guess = guess;
+        this.gameId = gameId;
     }
     
     /**
      * Gets the guesses
-     * @return the array of guesses
+     * @return the guesses
      */
     public int[] getGuesses() {
-        return guesses;
+        return guess;
+    }
+    
+    /**
+     * Gets the game ID
+     * @return the game ID
+     */
+    public int getGameId() {
+        return gameId;
     }
 }

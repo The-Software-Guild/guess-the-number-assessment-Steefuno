@@ -9,7 +9,9 @@ package com.mthree.guess_the_number_assessment.controllers;
 import java.sql.SQLIntegrityConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -17,8 +19,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * 
  * @author Steven
  */
+@ControllerAdvice
+@RestController
 public class GuessTheNumberControllerExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final String MESSAGE = "Your guess is invalid. Please make sure you have 4 slots and that the game ID is valid.";
+    private static final String SQL_CONTRAINT_VIOLATION_MESSAGE = "Your guess is invalid. Please make sure you have 4 slots and that the game ID is valid.";
     
     /**
      * On a sql constraint exception, tell the client they had a bad request
@@ -31,7 +35,7 @@ public class GuessTheNumberControllerExceptionHandler extends ResponseEntityExce
         SQLIntegrityConstraintViolationException ex,
         WebRequest request
     ) {
-        Error err = new Error(MESSAGE);
+        Error err = new Error(SQL_CONTRAINT_VIOLATION_MESSAGE);
         return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
     }
 }
