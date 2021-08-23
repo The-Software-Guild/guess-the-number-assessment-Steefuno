@@ -9,6 +9,9 @@ import com.mthree.guess_the_number_assessment.daos.GamesDao;
 import com.mthree.guess_the_number_assessment.models.GuessResult;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,20 +19,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  *
  * @author Steven
  */
+@SpringBootTest
 public class DataServiceTest {
     @Autowired
     private DataService dataService;
     
     @Autowired
     private GamesDao gamesDao;
-    
-    public DataServiceTest() {
-    }
     
     @BeforeAll
     public static void setUpClass() {
@@ -134,15 +136,15 @@ public class DataServiceTest {
         assertTrue(
             (
                 (results != null) &&
-                (results[0] == 'e') && (results[0] == 'p') && (results[0] == '0') && (results[0] == '0')
+                (results[0] == 'e') && (results[1] == 'p') && (results[2] == '0') && (results[3] == '0')
             ),
-            "results should be \"ep00\"."
+            "results should be \"ep00\". got " + Arrays.toString(results)
         );
         results = guessResult.getResults();
         assertTrue(
             (
                 (results != null) &&
-                (results[0] == 'e') && (results[0] == 'p') && (results[0] == '0') && (results[0] == '0')
+                (results[0] == 'e') && (results[1] == 'p') && (results[2] == '0') && (results[3] == '0')
             ),
             "results should be \"ep00\". got " + Arrays.toString(results)
         );
@@ -150,7 +152,7 @@ public class DataServiceTest {
         assertTrue(
             (
                 (guesses != null) &&
-                (guesses[0] == 0) && (guesses[0] == 2) && (guesses[0] == 4) && (guesses[0] == 5)
+                (guesses[0] == 0) && (guesses[1] == 2) && (guesses[2] == 4) && (guesses[3] == 5)
             ),
             "guesses should be \"0245\". got " + Arrays.toString(guesses)
         );
@@ -197,7 +199,7 @@ public class DataServiceTest {
                 gameId + 1
             );
             fail("addGuess should error.");
-        } catch (SQLIntegrityConstraintViolationException e) {
+        } catch (Exception e) {
             return;
         }
     }
@@ -247,6 +249,13 @@ public class DataServiceTest {
             return;
         }
         
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException ex) {
+            fail("Sleep should not error.");
+            return;
+        }
+        
         // guess and get the GuessResult
         try {
             dataService.addGuess(
@@ -273,15 +282,15 @@ public class DataServiceTest {
         assertTrue(
             (
                 (results != null) &&
-                (results[0] == 'e') && (results[0] == 'p') && (results[0] == '0') && (results[0] == '0')
+                (results[0] == 'e') && (results[1] == 'p') && (results[2] == '0') && (results[3] == '0')
             ),
-            "results should be \"ep00\"."
+            "results should be \"ep00\". got " + Arrays.toString(results)
         );
         results = guessResult.getResults();
         assertTrue(
             (
                 (results != null) &&
-                (results[0] == 'e') && (results[0] == 'p') && (results[0] == '0') && (results[0] == '0')
+                (results[0] == 'e') && (results[1] == 'p') && (results[2] == '0') && (results[3] == '0')
             ),
             "results should be \"ep00\". got " + Arrays.toString(results)
         );
@@ -289,7 +298,7 @@ public class DataServiceTest {
         assertTrue(
             (
                 (guesses != null) &&
-                (guesses[0] == 0) && (guesses[0] == 2) && (guesses[0] == 4) && (guesses[0] == 5)
+                (guesses[0] == 0) && (guesses[1] == 2) && (guesses[2] == 4) && (guesses[3] == 5)
             ),
             "guesses should be \"0245\". got " + Arrays.toString(guesses)
         );
@@ -332,6 +341,13 @@ public class DataServiceTest {
             return;
         }
         
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException ex) {
+            fail("Sleep should not error.");
+            return;
+        }
+        
         // guess and get the GuessResult
         try {
             dataService.addGuess(
@@ -364,15 +380,7 @@ public class DataServiceTest {
         assertTrue(
             (
                 (results != null) &&
-                (results[0] == 'e') && (results[0] == 'p') && (results[0] == '0') && (results[0] == '0')
-            ),
-            "results should be \"ep00\"."
-        );
-        results = guessResult.getResults();
-        assertTrue(
-            (
-                (results != null) &&
-                (results[0] == 'e') && (results[0] == 'p') && (results[0] == '0') && (results[0] == '0')
+                (results[0] == 'e') && (results[1] == 'p') && (results[2] == '0') && (results[3] == '0')
             ),
             "results should be \"ep00\". got " + Arrays.toString(results)
         );
@@ -380,7 +388,7 @@ public class DataServiceTest {
         assertTrue(
             (
                 (guesses != null) &&
-                (guesses[0] == 0) && (guesses[0] == 2) && (guesses[0] == 4) && (guesses[0] == 5)
+                (guesses[0] == 0) && (guesses[1] == 2) && (guesses[2] == 4) && (guesses[3] == 5)
             ),
             "guesses should be \"0245\". got " + Arrays.toString(guesses)
         );

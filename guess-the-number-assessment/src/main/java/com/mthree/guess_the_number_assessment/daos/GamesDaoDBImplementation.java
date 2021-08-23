@@ -16,6 +16,8 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -372,6 +374,7 @@ public class GamesDaoDBImplementation implements GamesDao {
         int[] solutionValues;
         HashMap<Integer, Timestamp> times;
         HashMap<Integer, int[]> guesses;
+        Comparator<Round> comparator;
         
         // get the number of rounds
         numRounds = jdbcTemplate.queryForObject(COUNT_ROUNDS_SQL, new IntegerMapper(), gameId);
@@ -421,6 +424,15 @@ public class GamesDaoDBImplementation implements GamesDao {
                 );
             }
         );
+        
+        comparator = new Comparator<>() {
+            @Override
+            public int compare(Round r1, Round r2) {
+                return r1.getTime().compareTo(r2.getTime());
+            }
+        };
+        Collections.sort(rounds, comparator);
+        Collections.reverse(rounds);
         
         return rounds.toArray(new Round[numRounds]);
     }
